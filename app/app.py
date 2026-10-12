@@ -11,6 +11,22 @@ from ratelimit import MAX_QUESTION_CHARS, RateLimiter
 from schema_context import SUMMARY_PROMPT, SYSTEM_PROMPT
 from sql_guard import UnsafeSqlError, validate_and_limit
 
+st.set_page_config(page_title="Cykelstaden - Malvin Portfolio Project", page_icon="🚲", layout="wide")
+
+# Streamlit Community Cloud: lägg secrets i miljön om de inte redan finns där.
+try:
+    for _key, _val in st.secrets.items():
+        if isinstance(_val, str):
+            os.environ.setdefault(_key, _val)
+except Exception:  # inga secrets konfigurerade (t.ex. i Databricks Apps)
+    pass
+
+_REQUIRED = ["DATABRICKS_WAREHOUSE_ID", "LLM_ENDPOINT"]
+_missing = [k for k in _REQUIRED if not os.environ.get(k)]
+if _missing:
+    st.error(f"Appen saknar konfiguration: {', '.join(_missing)}. Lägg till dem under App settings → Secrets.")
+    st.stop()
+
 CATALOG = os.environ.get("CATALOG", "workspace")
 SCHEMA = os.environ.get("SCHEMA", "cykelstaden")
 WAREHOUSE_ID = os.environ["DATABRICKS_WAREHOUSE_ID"]
@@ -68,7 +84,6 @@ def strip_fences(text: str) -> str:
     return re.sub(r"^```(?:sql)?\s*|\s*```$", "", text.strip(), flags=re.IGNORECASE)
 
 
-st.set_page_config(page_title="Cykelstaden - Malvin Portfolio Project", page_icon="🚲", layout="wide")
 st.title("🚲 Cykelstaden - Malvin Portfolio Project")
 st.caption("Ställ en fråga om Citi Bike-resor i New York (sep 2024). Svaren bygger på en ETL-pipeline i Databricks.")
 
