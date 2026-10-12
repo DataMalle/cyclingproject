@@ -77,7 +77,12 @@ def run_sql(sql: str) -> pd.DataFrame:
     cols = [c.name for c in res.manifest.schema.columns]
     rows = res.result.data_array if res.result and res.result.data_array else []
     df = pd.DataFrame(rows, columns=cols)
-    return df.apply(pd.to_numeric, errors="ignore")
+    for col in df.columns:
+        try:
+            df[col] = pd.to_numeric(df[col])
+        except (ValueError, TypeError):
+            pass  # behåll textkolumner som de är
+    return df
 
 
 def strip_fences(text: str) -> str:
@@ -92,7 +97,7 @@ if "question" not in st.session_state:
 
 cols = st.columns(len(EXAMPLES))
 for col, example in zip(cols, EXAMPLES):
-    if col.button(example, use_container_width=True):
+    if col.button(example, width="stretch"):
         st.session_state.question = example
 
 question = st.text_input("Din fråga", key="question", placeholder="t.ex. Vilka stationer är mest populära på morgonen?")
@@ -127,7 +132,7 @@ if st.button("Fråga", type="primary") and question.strip():
     st.subheader("Svar")
     st.write(summary)
     if not df.empty:
-        st.dataframe(df, use_container_width=True)
+        st.dataframe(df, width="stretch")
         numeric = df.select_dtypes("number").columns
         if len(df.columns) >= 2 and len(numeric) >= 1 and len(df) > 1:
             label = next((c for c in df.columns if c not in numeric), df.columns[0])
