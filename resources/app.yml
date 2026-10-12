@@ -1,0 +1,15 @@
+resources:
+  apps:
+    cykelstaden_app:
+      name: cykelstaden
+      description: Ställ frågor om Citi Bike-data på naturligt språk
+      source_code_path: ../app
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        - name: llm
+          serving_endpoint:
+            name: ${var.llm_endpoint}
+            permission: CAN_QUERY

@@ -1,0 +1,10 @@
+command: ["streamlit", "run", "app.py"]
+env:
+  - name: DATABRICKS_WAREHOUSE_ID
+    valueFrom: sql-warehouse
+  - name: LLM_ENDPOINT
+    valueFrom: llm
+  - name: CATALOG
+    value: workspace
+  - name: SCHEMA
+    value: cykelstaden

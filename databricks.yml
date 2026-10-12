@@ -1,0 +1,31 @@
+bundle:
+  name: cykelstaden
+
+include:
+  - resources/*.yml
+
+sync:
+  exclude:
+    - data_raw/**
+    - tests/**
+
+variables:
+  catalog:
+    description: Unity Catalog-katalog som tabellerna skapas i
+    default: workspace
+  schema:
+    description: Schema för bronze/silver/gold-tabeller
+    default: cykelstaden
+  months:
+    description: Kommaseparerade månader (YYYYMM) att ladda in från Citi Bike
+    default: "202409"
+  warehouse_id:
+    description: ID på SQL warehouse som appen använder (finns under SQL Warehouses > Connection details)
+  llm_endpoint:
+    description: Model Serving-endpoint som genererar SQL
+    default: databricks-meta-llama-3-3-70b-instruct
+
+targets:
+  dev:
+    default: true
+    mode: development
