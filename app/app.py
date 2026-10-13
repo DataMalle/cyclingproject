@@ -1,5 +1,6 @@
 import os
 import re
+import time
 
 import pandas as pd
 import streamlit as st
@@ -64,14 +65,21 @@ def chat(system: str, user: str) -> str:
     return resp.choices[0].message.content.strip()
 
 
-def run_sql(sql: str) -> pd.DataFrame:
-    res = client().statement_execution.execute_statement(
-        statement=sql,
-        warehouse_id=WAREHOUSE_ID,
-        catalog=CATALOG,
-        schema=SCHEMA,
-        wait_timeout="50s",
+_DONE = {StatementState.SUCCEEDED, StatementState.FAILED, StatementState.CANCELED, StatementState.CLOSED}
+
+
+def run_sql(sql: str, max_wait_s: int = 240) -> pd.DataFrame:
+    """Kör SQL och väntar klart, även om warehouse måste startas först (kan ta flera minuter)."""
+    api = client().statement_execution
+    res = api.execute_statement(
+        statement=sql, warehouse_id=WAREHOUSE_ID, catalog=CATALOG, schema=SCHEMA, wait_timeout="30s"
     )
+    deadline = time.monotonic() + max_wait_s
+    while res.status.state not in _DONE:
+        if time.monotonic() > deadline:
+            raise TimeoutError("Databricks SQL warehouse startade inte i tid. Försök igen om en stund.")
+        time.sleep(2)
+        res = api.get_statement(res.statement_id)
     if res.status.state != StatementState.SUCCEEDED:
         raise RuntimeError(res.status.error.message if res.status.error else str(res.status.state))
     cols = [c.name for c in res.manifest.schema.columns]
