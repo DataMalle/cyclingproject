@@ -1,5 +1,6 @@
-data_raw/
-.databricks/
-__pycache__/
-.pytest_cache/
 **/.streamlit/secrets.toml
+.claude/
+.databricks/
+.pytest_cache/
+__pycache__/
+data_raw/

@@ -1,7 +1,8 @@
 """Enkel ratebegränsning för publik drift: per sessions och globalt per dygn (i minnet)."""
+
 import threading
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 MAX_QUESTION_CHARS = 300
 
@@ -17,7 +18,7 @@ class RateLimiter:
 
     @staticmethod
     def _today() -> str:
-        return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        return datetime.now(UTC).strftime("%Y-%m-%d")
 
     def check(self, session_state: dict) -> str | None:
         """Returnerar ett felmeddelande om frågan ska nekas, annars None (och räknar frågan)."""

@@ -2,7 +2,8 @@ resources:
   jobs:
     cykelstaden_etl:
       name: cykelstaden-etl
-      description: Bronze -> Silver -> Gold för Citi Bike-data
+      description: Bronze (COPY INTO) -> Silver (MERGE) -> Gold för Citi Bike-data
+      max_concurrent_runs: 1
       parameters:
         - name: catalog
           default: ${var.catalog}
@@ -10,6 +11,8 @@ resources:
           default: ${var.schema}
         - name: months
           default: ${var.months}
+        - name: full_refresh
+          default: "false" # "true" bygger om bronze och silver från rådatafilerna
       tasks:
         - task_key: bronze
           notebook_task:
